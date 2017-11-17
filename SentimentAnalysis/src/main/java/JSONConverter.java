@@ -10,9 +10,9 @@ public class JSONConverter {
 
         JSONArray jsonArray = new JSONArray();
 
-        BufferedReader br = new BufferedReader(new FileReader("path_to_your_output_part-r-00000"));
+        BufferedReader br = new BufferedReader(new FileReader("/Users/Ryan_Garfield/Documents/BigData/BigDataProject/SentimentAnalysis/src/main/resources/output/part-r-00000"));
         String line = br.readLine();
-        FileWriter fileWriter = new FileWriter("path_you_want_to_store_result.json");
+        FileWriter fileWriter = new FileWriter("/Users/Ryan_Garfield/Documents/BigData/BigDataProject/SentimentAnalysis/src/main/resources/output/result.json");
 
         BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 

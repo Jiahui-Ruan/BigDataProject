@@ -1,8 +1,13 @@
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -19,7 +24,7 @@ public class SentimentAnalysis {
         public void setup(Context context) throws IOException{
             // init emotionLibrary
             Configuration configuration = context.getConfiguration();
-            String path = configuration.get("dictionary");
+            String path = configuration.get("dictionary", "");
             BufferedReader br = new BufferedReader(new FileReader(path));
             String line = br.readLine();
 
@@ -41,18 +46,18 @@ public class SentimentAnalysis {
             // split into single words
             // look up emotionLibrary to find emotion
             // write k-v pair
+            String fileName = ((FileSplit) context.getInputSplit()).getPath().getName();
             String[] words = value.toString().split("\\s+"); // split by space
             for (String word : words) {
-                if (emotionLibrary.containsKey(word)) {
-                    String sentiment = emotionLibrary.get(word.toLowerCase());
-                    context.write(new Text(sentiment), new IntWritable(1));
+                if (emotionLibrary.containsKey(word.trim().toLowerCase())) {
+                    context.write(new Text(fileName + "\t" + emotionLibrary.get(word.toLowerCase())), new IntWritable(1));
                 }
             }
         }
     }
 
     public static class SentimentCollection extends Reducer<Text, IntWritable, Text, IntWritable> {
-        Override
+        @Override
         public void reduce(Text key, Iterable<IntWritable> values, Context context)
                 throws IOException, InterruptedException {
             // key = positive
@@ -66,6 +71,19 @@ public class SentimentAnalysis {
     }
 
     public static void main(String[] args) throws Exception {
+        Configuration configuration = new Configuration();
+        configuration.set("dictionary", args[2]);
 
+        Job job = Job.getInstance(configuration);
+        job.setJarByClass(SentimentAnalysis.class);
+        job.setMapperClass(SentimentSplit.class);
+        job.setReducerClass(SentimentCollection.class);
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(IntWritable.class);
+
+        FileInputFormat.addInputPath(job, new Path(args[0]));
+        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+
+        job.waitForCompletion(true);
     }
 }
