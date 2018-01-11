@@ -18,13 +18,14 @@ import java.util.Map;
 public class SentimentAnalysis {
 
     public static class SentimentSplit extends Mapper<Object, Text, Text, IntWritable> {
+
         public Map<String, String> emotionLibrary = new HashMap<String, String>();
 
         @Override
         public void setup(Context context) throws IOException{
-            // init emotionLibrary
+            // create emotionLibrary
             Configuration configuration = context.getConfiguration();
-            String path = configuration.get("dictionary", "");
+            String path = configuration.get("dictionary");
             BufferedReader br = new BufferedReader(new FileReader(path));
             String line = br.readLine();
 
@@ -38,39 +39,40 @@ public class SentimentAnalysis {
         }
 
         @Override
-        public void map(Object key, Text value, Context context)
-                throws IOException, InterruptedException {
-            // key = offset
-            // value = line
+        public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+            // key => offset
+            // value => line
             // read file
             // split into single words
-            // look up emotionLibrary to find emotion
-            // write k-v pair
+            // look up sentimentalLibrary
+            // write out k-v pair
             String fileName = ((FileSplit) context.getInputSplit()).getPath().getName();
             String[] words = value.toString().split("\\s+"); // split by space
             for (String word : words) {
-                if (emotionLibrary.containsKey(word.trim().toLowerCase())) {
-                    context.write(new Text(fileName + "\t" + emotionLibrary.get(word.toLowerCase())), new IntWritable(1));
+                if (emotionLibrary.containsKey(word.toLowerCase())) {
+                    String sentiment = emotionLibrary.get(word.toLowerCase());
+                    context.write(new Text(fileName + "\t" + sentiment), new IntWritable(1));
                 }
             }
         }
     }
 
     public static class SentimentCollection extends Reducer<Text, IntWritable, Text, IntWritable> {
+
         @Override
-        public void reduce(Text key, Iterable<IntWritable> values, Context context)
-                throws IOException, InterruptedException {
-            // key = positive
-            // value = <1, 1, 1, 1>
+        public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
             int sum = 0;
             for (IntWritable value : values) {
                 sum += value.get();
             }
+
             context.write(key, new IntWritable(sum));
         }
+
     }
 
     public static void main(String[] args) throws Exception {
+
         Configuration configuration = new Configuration();
         configuration.set("dictionary", args[2]);
 

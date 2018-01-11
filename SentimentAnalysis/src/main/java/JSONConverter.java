@@ -12,7 +12,7 @@ public class JSONConverter {
 
         BufferedReader br = new BufferedReader(new FileReader("/Users/Ryan_Garfield/Documents/BigData/BigDataProject/SentimentAnalysis/src/main/resources/output/part-r-00000"));
         String line = br.readLine();
-        FileWriter fileWriter = new FileWriter("/Users/Ryan_Garfield/Documents/BigData/BigDataProject/SentimentAnalysis/src/main/resources/output/result.json");
+        FileWriter fileWriter = new FileWriter("/Users/Ryan_Garfield/Documents/BigData/BigDataProject/SentimentAnalysis/src/main/resources/result.json");
 
         BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 
