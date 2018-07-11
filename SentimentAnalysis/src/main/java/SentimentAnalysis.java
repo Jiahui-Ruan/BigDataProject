@@ -19,6 +19,11 @@ public class SentimentAnalysis {
 
     public static class SentimentSplit extends Mapper<Object, Text, Text, IntWritable> {
 
+        // read file
+        // split into single words
+        // look up sentimentLibrary -> sentiment
+        // write out key value
+
         public Map<String, String> emotionDic = new HashMap<String, String>();
 
         @Override
