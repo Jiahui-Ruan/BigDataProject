@@ -45,7 +45,7 @@ public class Driver {
 		//2nd job
 		Configuration conf2 = new Configuration();
 		conf2.set("threashold", args[3]);
-		conf2.set("n", args[4]);
+		conf2.set("topK", args[4]);
 		
 		DBConfiguration.configureDB(conf2, 
 				"com.mysql.jdbc.Driver",
@@ -58,8 +58,10 @@ public class Driver {
 		job2.setJarByClass(Driver.class);
 		
 		job2.addArchiveToClassPath(new Path("path_to_ur_connector"));
+
 		job2.setMapOutputKeyClass(Text.class);
 		job2.setMapOutputValueClass(Text.class);
+
 		job2.setOutputKeyClass(DBOutputWritable.class);
 		job2.setOutputValueClass(NullWritable.class);
 		
